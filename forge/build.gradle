@@ -97,7 +97,7 @@ dependencies {
 def CURSE_API_KEY = project.findProperty("curseforge") ?: System.getenv("curseforge");
 def MODRINTH_TOKEN = project.findProperty("modrinth") ?: System.getenv("modrinth");
 
-if (true) {
+if (false) {
     unifiedPublishing {
         project {
             displayName = "[Forge] Tardis Refined - $project.version"
