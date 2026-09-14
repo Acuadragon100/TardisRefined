@@ -1,9 +1,12 @@
 package whocraft.tardis_refined.common.tardis.manager;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -12,17 +15,28 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import whocraft.tardis_refined.api.event.TardisCommonEvents;
+import whocraft.tardis_refined.common.block.device.AntiGravityBlock;
+import whocraft.tardis_refined.common.block.device.CorridorTeleporterBlock;
+import whocraft.tardis_refined.common.block.device.TerraformerBlock;
 import whocraft.tardis_refined.common.block.door.BulkHeadDoorBlock;
+import whocraft.tardis_refined.common.block.door.InternalDoorBlock;
+import whocraft.tardis_refined.common.block.life.ArsEggBlock;
+import whocraft.tardis_refined.common.block.life.EyeBlock;
+import whocraft.tardis_refined.common.block.shell.ShellBaseBlock;
 import whocraft.tardis_refined.common.blockentity.door.BulkHeadDoorBlockEntity;
 import whocraft.tardis_refined.common.blockentity.door.TardisInternalDoor;
 import whocraft.tardis_refined.common.capability.tardis.TardisLevelOperator;
 import whocraft.tardis_refined.common.capability.tardis.upgrades.UpgradeHandler;
+import whocraft.tardis_refined.common.dimension.DimensionHandler;
+import whocraft.tardis_refined.common.tardis.TardisNavLocation;
 import whocraft.tardis_refined.registry.TRUpgrades;
 import whocraft.tardis_refined.common.dimension.TardisTeleportData;
 import whocraft.tardis_refined.common.soundscape.hum.HumEntry;
@@ -49,6 +63,7 @@ public class TardisInteriorManager extends TickableHandler {
     private boolean isWaitingToGenerate = false;
     private boolean isGeneratingDesktop = false;
     private boolean hasGeneratedCorridors = false;
+    private boolean deleting = false;
     private int interiorGenerationCooldown = 0;
     private BlockPos corridorAirlockCenter = BlockPos.ZERO;
     private DesktopTheme preparedTheme, currentTheme = TardisDesktops.DEFAULT_OVERGROWN_THEME;
@@ -130,6 +145,8 @@ public class TardisInteriorManager extends TickableHandler {
             tag.put(NbtConstants.TARDIS_IM_AIRLOCK_CENTER, NbtUtils.writeBlockPos(this.corridorAirlockCenter));
         }
 
+        tag.putBoolean(NbtConstants.TARDIS_IM_DELETING, deleting);
+
 
         tag.putString(NbtConstants.TARDIS_IM_PREPARED_THEME, this.preparedTheme != null ? this.preparedTheme.getIdentifier().toString() : "");
         if (currentTheme != null) {
@@ -152,6 +169,9 @@ public class TardisInteriorManager extends TickableHandler {
         this.currentTheme = tag.contains(NbtConstants.TARDIS_IM_CURRENT_THEME) ? TardisDesktops.getDesktopById(new ResourceLocation((NbtConstants.TARDIS_IM_CURRENT_THEME))) : preparedTheme;
         this.corridorAirlockCenter = NbtUtils.readBlockPos(tag.getCompound(NbtConstants.TARDIS_IM_AIRLOCK_CENTER));
         this.humEntry = TardisHums.getHumById(new ResourceLocation(tag.getString(NbtConstants.TARDIS_CURRENT_HUM)));
+        if (tag.contains(NbtConstants.TARDIS_IM_DELETING, Tag.TAG_BYTE)) {
+            this.deleting = tag.getBoolean(NbtConstants.TARDIS_IM_DELETING);
+        }
 
         this.fuelForIntChange = tag.getDouble(NbtConstants.TARDIS_IM_FUEL_FOR_INT_CHANGE);
         if (!tag.contains(NbtConstants.TARDIS_IM_FUEL_FOR_INT_CHANGE)) {
@@ -276,9 +296,25 @@ public class TardisInteriorManager extends TickableHandler {
         }
     }
 
-    public boolean shouldTheEyeBeOpen(ServerLevel level) {
+    public int countArtronPillarsPresent(ServerLevel level) {
+        int i = 0;
+        if (level.getBlockState(pillarTopLeft).getBlock() == TRBlockRegistry.ARTRON_PILLAR.get()) {
+            i++;
+        }
+        if (level.getBlockState(pillarTopRight).getBlock() == TRBlockRegistry.ARTRON_PILLAR.get()) {
+            i++;
+        }
+        if (level.getBlockState(pillarBottomLeft).getBlock() == TRBlockRegistry.ARTRON_PILLAR.get()) {
+            i++;
+        }
+        if (level.getBlockState(pillarBottomRight).getBlock() == TRBlockRegistry.ARTRON_PILLAR.get()) {
+            i++;
+        }
+        return i;
+    }
 
-        return level.getBlockState(pillarTopLeft).getBlock() == TRBlockRegistry.ARTRON_PILLAR.get() && level.getBlockState(pillarTopRight).getBlock() == TRBlockRegistry.ARTRON_PILLAR.get() && level.getBlockState(pillarBottomLeft).getBlock() == TRBlockRegistry.ARTRON_PILLAR.get() && level.getBlockState(pillarBottomRight).getBlock() == TRBlockRegistry.ARTRON_PILLAR.get() && operator.getTardisState() == TardisLevelOperator.STATE_TERRAFORMED_NO_EYE;
+    public boolean shouldTheEyeBeOpen(ServerLevel level) {
+        return countArtronPillarsPresent(level) >= 4 && operator.getTardisState() == TardisLevelOperator.STATE_TERRAFORMED_NO_EYE;
     }
 
     public void openTheEye() {
@@ -354,19 +390,126 @@ public class TardisInteriorManager extends TickableHandler {
         this.corridorAirlockCenter = center;
     }
 
+    private void playGenerationEffects(ServerLevel level) {
+        if (level.random.nextInt(30) == 0) {
+            level.playSound(null, TardisArchitectureHandler.DESKTOP_CENTER_POS, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 5.0F + level.random.nextFloat(), level.random.nextFloat() * 0.7F + 0.3F);
+        }
+
+        if (level.random.nextInt(100) == 0) {
+            level.playSound(null, TardisArchitectureHandler.DESKTOP_CENTER_POS, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 15.0F + level.random.nextFloat(), 0.1f);
+        }
+    }
+
+    private boolean canBreak(ServerLevel level, BlockPos pos, BlockState state) {
+        // Leave the door so the player can escape.
+        if (state.getBlock() instanceof InternalDoorBlock) {
+            return false;
+        }
+
+        if (state.getBlock() instanceof ShellBaseBlock) {
+            // Not sure how that got in here, but let's not break it.
+            return false;
+        }
+
+        // Would be kind of awkward if deletion has a chance to cancel deltion.
+        if (state.getBlock() instanceof TerraformerBlock) {
+            return false;
+        }
+
+        // Don't break the airlock too much.
+        if (pos.distManhattan(STATIC_CORRIDOR_POSITION) < 5 || pos.distManhattan(corridorAirlockCenter) < 5) {
+            return false;
+        }
+        // In case deletion is aborted we still want it to be usable.
+        if (state.getBlock() instanceof ArsEggBlock || state.getBlock() instanceof CorridorTeleporterBlock || state.getBlock() instanceof AntiGravityBlock || state.getBlock() instanceof EyeBlock) {
+            return false;
+        }
+        return true;
+    }
+
+    private int emptyTime = 0;
+
+    private void doBreakingEffects(ServerLevel level) {
+        for (var player : level.players()) {
+            if (player.tickCount % (player.getRandom().nextInt(20) + 1) == 0) {
+                int count = player.getRandom().nextInt(250);
+                int range = player.getRandom().nextInt(25);
+                var playerPos = player.blockPosition();
+                for (
+                        BlockPos pos : BlockPos.randomBetweenClosed(
+                              player.getRandom(), count,
+                              playerPos.getX() - range, playerPos.getY()-1, playerPos.getZ() - range,
+                              playerPos.getX() + range, playerPos.getY() + range, playerPos.getZ() + range
+                        )
+                ) {
+                    if (!canBreak(level, pos, level.getBlockState(pos)) || level.getBlockState(pos).isAir()) {
+                        continue;
+                    }
+                    var centerPos = Vec3.atCenterOf(pos);
+                    level.sendParticles(
+                            new BlockParticleOption(ParticleTypes.FALLING_DUST, level.getBlockState(pos)),
+                            centerPos.x, centerPos.y-3, centerPos.z, 5,
+                            player.getRandom().nextDouble(),
+                            player.getRandom().nextDouble() * 3,
+                            player.getRandom().nextDouble(),
+                            1
+                    );
+                    if (level.getBlockState(pos.below()).isAir() && level.getBlockEntity(pos) == null && player.getRandom().nextDouble() > 0.5) {
+                        var falling = FallingBlockEntity.fall(level, pos, level.getBlockState(pos));
+                        falling.dropItem = false;
+                    } else {
+                        level.setBlock(pos, level.getBlockState(pos).getFluidState().createLegacyBlock(), Block.UPDATE_CLIENTS | Block.UPDATE_SUPPRESS_DROPS);
+                    }
+                }
+            }
+        }
+        if (level.players().isEmpty()) {
+            emptyTime++;
+            if (emptyTime > 50) {
+                operator.setDoorClosed(true);
+            }
+        }
+    }
+
+    private void performDelete(ServerLevel level) {
+        operator.setDoorClosed(true);
+        operator.setDoorLocked(true);
+        operator.forceEjectAllPlayers();
+        operator.getExteriorManager().removeExteriorBlock();
+
+        if (operator.getPilotingManager().getCurrentConsole() != null) {
+            level.setBlockAndUpdate(
+                    operator.getPilotingManager().getCurrentConsole().getBlockPos(),
+                    Blocks.AIR.defaultBlockState()
+            );
+        }
+
+        var levelKey = operator.getLevelKey();
+        operator.getPilotingManager().setFuel(0);
+        operator.getPilotingManager().setCurrentLocation(new TardisNavLocation(BlockPos.ZERO, Direction.NORTH, levelKey));
+        operator.getInteriorManager().cancelDesktopChange();
+
+        operator.setTardisState(TardisLevelOperator.STATE_DELETED);
+        DimensionHandler.deleteDimension(levelKey);
+    }
+
     /**
      * Master logic that schedules the desktop preparation, generation and aesthetic effects in one place
      * <br> Should be called in the {@link TardisInteriorManager#tick()}
      */
     public void handleDesktopGeneration(ServerLevel level) {
-        if (this.isWaitingToGenerate) {
-            if (level.random.nextInt(30) == 0) {
-                level.playSound(null, TardisArchitectureHandler.DESKTOP_CENTER_POS, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 5.0F + level.random.nextFloat(), level.random.nextFloat() * 0.7F + 0.3F);
+        if (deleting) {
+            playGenerationEffects(level);
+            if (level.players().isEmpty() && !operator.getInternalDoor().isOpen()) {
+                performDelete(level);
+            } else {
+                doBreakingEffects(level);
             }
+            return;
+        }
 
-            if (level.random.nextInt(100) == 0) {
-                level.playSound(null, TardisArchitectureHandler.DESKTOP_CENTER_POS, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 15.0F + level.random.nextFloat(), 0.1f);
-            }
+        if (this.isWaitingToGenerate) {
+            playGenerationEffects(level);
             //This check doesn't actually work for players that respawn, login or teleport to the Tardis dimension when the Tardis is waiting to generate because our tick method is being called at the start of the server tick.
             //To mitigate the problem where players become stuck inside the stone and suffocate to death, we call TardisLevelOperator#ejectPlayer in the relevant Events.
             if (level.players().isEmpty()) {
@@ -430,6 +573,15 @@ public class TardisInteriorManager extends TickableHandler {
 
     public void setHasGeneratedCorridors(boolean hasGeneratedCorridors) {
         this.hasGeneratedCorridors = hasGeneratedCorridors;
+    }
+
+    public void deleteTARDIS() {
+        deleting = true;
+    }
+
+    public void cancelDeletion() {
+        deleting = false;
+        emptyTime = 0;
     }
 
     /**

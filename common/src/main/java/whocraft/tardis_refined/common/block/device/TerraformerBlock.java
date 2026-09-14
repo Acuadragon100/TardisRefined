@@ -120,6 +120,7 @@ public class TerraformerBlock extends Block {
                     if (interiorManager.isWaitingToGenerate()) {
                         interiorManager.cancelDesktopChange();
                     }
+                    interiorManager.cancelDeletion();
                 });
             }
         }
@@ -188,7 +189,7 @@ public class TerraformerBlock extends Block {
 
             @Override
             public boolean canActivate(TardisLevelOperator tardis) {
-                return tardis.getTardisState() != TardisLevelOperator.STATE_DELETED;
+                return tardis.getTardisState() != TardisLevelOperator.STATE_DELETED && tardis.getInteriorManager().countArtronPillarsPresent((ServerLevel) tardis.getLevel()) <= 0;
             }
 
             @Override

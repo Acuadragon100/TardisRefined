@@ -649,24 +649,7 @@ public class TardisLevelOperator {
         this.tardisState = state;
     }
 
-    public boolean deleteTARDIS() {
-        this.forceEjectAllPlayers();
-        this.getExteriorManager().removeExteriorBlock();
-
-        if (this.getPilotingManager().getCurrentConsole() != null) {
-            this.level.setBlockAndUpdate(
-                    this.getPilotingManager().getCurrentConsole().getBlockPos(),
-                    Blocks.AIR.defaultBlockState()
-            );
-        }
-
-        getPilotingManager().setFuel(0);
-        getPilotingManager().setCurrentLocation(new TardisNavLocation(BlockPos.ZERO, Direction.NORTH, levelKey));
-        getInteriorManager().cancelDesktopChange();
-
-        setTardisState(STATE_DELETED);
-        DimensionHandler.deleteDimension(levelKey);
-
-        return true;
+    public void deleteTARDIS() {
+        getInteriorManager().deleteTARDIS();
     }
 }
