@@ -5,6 +5,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,7 +29,11 @@ import whocraft.tardis_refined.common.tardis.TardisDesktops;
 import whocraft.tardis_refined.common.tardis.manager.TardisInteriorManager;
 import whocraft.tardis_refined.registry.TRDimensionTypes;
 import whocraft.tardis_refined.registry.TRSoundRegistry;
+import whocraft.tardis_refined.registry.TRTagKeys;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static net.minecraft.world.phys.shapes.BooleanOp.OR;
@@ -128,17 +133,15 @@ public class TerraformerBlock extends Block {
                 if (player.getMainHandItem().getItem() instanceof ScrewdriverItem screwdriverItem) {
                     screwdriverItem.playScrewdriverSound(serverLevel, blockPos, TRSoundRegistry.SCREWDRIVER_SHORT.get());
 
-                    if (checkIfStructure(serverLevel, blockPos)) {
+                    var terraformType = getTerraformType(serverLevel, blockPos);
+                    if (terraformType.isPresent()) {
                         TardisLevelOperator.get(serverLevel).ifPresent(cap -> {
-                            TardisInteriorManager interiorManager = cap.getInteriorManager();
-                            if (interiorManager.isWaitingToGenerate()) {
+                            if (cap.getInteriorManager().isWaitingToGenerate() || !terraformType.get().canActivate(cap)) {
                                 level.destroyBlock(blockPos, true);
                             } else {
-                                if (cap.getTardisState() == TardisLevelOperator.STATE_CAVE) {
-                                    interiorManager.prepareDesktop(TardisDesktops.TERRAFORMED);
-                                    destroyStructure(serverLevel, blockPos);
-                                    serverLevel.setBlock(blockPos, blockState.setValue(ACTIVE, true), Block.UPDATE_ALL);
-                                }
+                                terraformType.get().activate(cap);
+                                destroyStructure(serverLevel, blockPos);
+                                serverLevel.setBlock(blockPos, blockState.setValue(ACTIVE, true), Block.UPDATE_ALL);
                             }
                         });
                     } else {
@@ -152,31 +155,126 @@ public class TerraformerBlock extends Block {
         return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }
 
-    private boolean checkIfStructure(Level level, BlockPos blockPos) {
+    static {
+        TerraformType.register(new TerraformType.Simple.TagBased() {
 
-        if (level.dimensionTypeId() != TRDimensionTypes.TARDIS) {
-            return false;
-        }
+            @Override
+            public TagKey<Block> surrounding() {
+                return TRTagKeys.TERRAFORMER_ENCASED_CORRIDORS;
+            }
 
-        BlockPos startingCorner = new BlockPos(blockPos.getX() - 1, blockPos.getY() - 1, blockPos.getZ() - 1);
-        for (int x = startingCorner.getX(); x < startingCorner.getX() + 3; x++) {
-            for (int z = startingCorner.getZ(); z < startingCorner.getZ() + 3; z++) {
+            @Override
+            public boolean canActivate(TardisLevelOperator tardis) {
+                return tardis.getTardisState() == TardisLevelOperator.STATE_CAVE;
+            }
 
-                BlockState state = level.getBlockState(new BlockPos(x, startingCorner.getY(), z));
+            @Override
+            public void activate(TardisLevelOperator tardis) {
+                tardis.getInteriorManager().prepareDesktop(TardisDesktops.TERRAFORMED);
+            }
+        });
 
-                if (x == startingCorner.getX() + 1 && z == startingCorner.getZ() + 1) {
-                    if (state.getBlock() != Blocks.REDSTONE_BLOCK) {
-                        return false;
-                    }
-                } else {
-                    if (state.getBlock() != Blocks.COPPER_BLOCK) {
-                        return false;
+        TerraformType.register(new TerraformType.Simple.TagBased() {
+
+            @Override
+            public TagKey<Block> center() { // Can't use redstone here because TNT would activate.
+                return TRTagKeys.TERRAFORMER_DELETE_CENTER;
+            }
+
+            @Override
+            public TagKey<Block> surrounding() {
+                return TRTagKeys.TERRAFORMER_DELETE;
+            }
+
+            @Override
+            public boolean canActivate(TardisLevelOperator tardis) {
+                return tardis.getTardisState() != TardisLevelOperator.STATE_DELETED;
+            }
+
+            @Override
+            public void activate(TardisLevelOperator tardis) {
+                tardis.deleteTARDIS();
+            }
+        });
+    }
+
+    public interface TerraformType {
+
+        List<TerraformType> ALL = new ArrayList<>();
+
+        boolean isValidStructure(Level level, BlockPos blockPos);
+
+        boolean canActivate(TardisLevelOperator tardis);
+
+        void activate(TardisLevelOperator tardis);
+
+        interface Simple extends TerraformType {
+
+            boolean isValidCenter(Level level, BlockPos blockPos, BlockState state);
+            boolean isValidSurrounding(Level level, BlockPos blockPos, BlockState state);
+
+            @Override
+            default boolean isValidStructure(Level level, BlockPos blockPos) {
+                BlockPos startingCorner = new BlockPos(blockPos.getX() - 1, blockPos.getY() - 1, blockPos.getZ() - 1);
+                for (int x = startingCorner.getX(); x < startingCorner.getX() + 3; x++) {
+                    for (int z = startingCorner.getZ(); z < startingCorner.getZ() + 3; z++) {
+
+                        BlockState state = level.getBlockState(new BlockPos(x, startingCorner.getY(), z));
+
+                        if (x == startingCorner.getX() + 1 && z == startingCorner.getZ() + 1) {
+                            if (!isValidCenter(level, startingCorner, state)) {
+                                return false;
+                            }
+                        } else {
+                            if (!isValidSurrounding(level, startingCorner, state)) {
+                                return false;
+                            }
+                        }
                     }
                 }
+                return true;
+            }
+
+            interface TagBased extends Simple {
+
+                default TagKey<Block> center() {
+                    return TRTagKeys.TERRAFORMER_CENTER;
+                }
+
+                TagKey<Block> surrounding();
+
+                @Override
+                default boolean isValidCenter(Level level, BlockPos blockPos, BlockState state) {
+                    return state.is(center());
+                }
+
+                @Override
+                default boolean isValidSurrounding(Level level, BlockPos blockPos, BlockState state) {
+                    return state.is(surrounding());
+                }
+
             }
         }
 
-        return true;
+        static void register(TerraformType type) {
+            ALL.add(type);
+        }
+
+    }
+
+    private Optional<TerraformType> getTerraformType(Level level, BlockPos blockPos) {
+
+        if (level.dimensionTypeId() != TRDimensionTypes.TARDIS) {
+            return Optional.empty();
+        }
+
+        for (var type : TerraformType.ALL) {
+            if (type.isValidStructure(level, blockPos)) {
+                return Optional.of(type);
+            }
+        }
+
+        return Optional.empty();
 
     }
 

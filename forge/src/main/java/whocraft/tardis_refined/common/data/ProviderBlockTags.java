@@ -3,7 +3,9 @@ package whocraft.tardis_refined.common.data;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.*;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.BlockTagsProvider;
@@ -83,6 +85,31 @@ public class ProviderBlockTags extends BlockTagsProvider {
                 .add(TRBlockRegistry.ASTRAL_MANIPULATOR_BLOCK.get())
                 .add(TRBlockRegistry.ZEITON_BLOCK.get())
                 .add(TRBlockRegistry.ASTRAL_MANIPULATOR_BLOCK.get());
+
+        tag(TRTagKeys.TERRAFORMER_CENTER)
+                .addOptionalTag(Tags.Blocks.STORAGE_BLOCKS_REDSTONE)
+                .addOptionalTag(BlockTags.create(new ResourceLocation("c", "storage_blocks/redstone")))
+                .add(Blocks.REDSTONE_BLOCK.builtInRegistryHolder().key());
+
+        tag(TRTagKeys.TERRAFORMER_ENCASED_CORRIDORS)
+                .addOptionalTag(Tags.Blocks.STORAGE_BLOCKS_COPPER)
+                .addOptionalTag(BlockTags.create(new ResourceLocation("c", "storage_blocks/copper")))
+                .add(
+                        Blocks.COPPER_BLOCK.builtInRegistryHolder().key(),
+                        Blocks.EXPOSED_COPPER.builtInRegistryHolder().key(),
+                        Blocks.WEATHERED_COPPER.builtInRegistryHolder().key(),
+                        Blocks.OXIDIZED_COPPER.builtInRegistryHolder().key(),
+                        Blocks.WAXED_COPPER_BLOCK.builtInRegistryHolder().key(),
+                        Blocks.WAXED_EXPOSED_COPPER.builtInRegistryHolder().key(),
+                        Blocks.WAXED_WEATHERED_COPPER.builtInRegistryHolder().key(),
+                        Blocks.WAXED_OXIDIZED_COPPER.builtInRegistryHolder().key()
+                );
+
+        tag(TRTagKeys.TERRAFORMER_DELETE)
+                .add(Blocks.TNT);
+
+        tag(TRTagKeys.TERRAFORMER_DELETE_CENTER)
+                .addTag(TRTagKeys.TERRAFORMER_DELETE);
 
 
         // ===== DIAGONAL WALLS =====

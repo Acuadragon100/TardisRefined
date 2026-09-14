@@ -20,6 +20,10 @@ public class TRTagKeys {
     public static TagKey<Block> DIAGONAL_COMPAT_WALLS = RegistryHelper.makeBlockTag("diagonalwalls", "non_diagonal_walls");
     public static TagKey<Block> DIAGONAL_COMPAT_GLASS = RegistryHelper.makeBlockTag("diagonalwindows", "non_diagonal_windows");
     public static TagKey<Block> DIAGONAL_COMPAT_FENCES = RegistryHelper.makeBlockTag("diagonalfences", "non_diagonal_fences");
+    public static TagKey<Block> TERRAFORMER_CENTER = RegistryHelper.makeBlockTag(TardisRefined.MODID, "terraformer_center");
+    public static TagKey<Block> TERRAFORMER_ENCASED_CORRIDORS = RegistryHelper.makeBlockTag(TardisRefined.MODID, "terraformer_encased_corridors");
+    public static TagKey<Block> TERRAFORMER_DELETE = RegistryHelper.makeBlockTag(TardisRefined.MODID, "terraformer_delete");
+    public static TagKey<Block> TERRAFORMER_DELETE_CENTER = RegistryHelper.makeBlockTag(TardisRefined.MODID, "terraformer_delete_center");
     public static TagKey<Item> CURIOS_HEAD = RegistryHelper.makeItemTag("curios", "timelord_sight");
     public static TagKey<Item> TRINKETS_HEAD = RegistryHelper.makeItemTag("trinkets", "head/hat");
     public static TagKey<Item> TRINKETS_FACE = RegistryHelper.makeItemTag("trinkets", "head/face");
