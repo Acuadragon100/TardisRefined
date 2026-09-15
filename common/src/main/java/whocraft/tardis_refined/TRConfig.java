@@ -83,6 +83,7 @@ public class TRConfig {
         public final ForgeConfigSpec.DoubleValue XP_FACTOR;
         public final ForgeConfigSpec.EnumValue<DeleteMode> DIMENSION_DELETE_MODE;
         public final ForgeConfigSpec.BooleanValue DELETE_ESCAPE_SEQUENCE;
+        public final ForgeConfigSpec.IntValue DELETION_TIMER;
 
         public final ForgeConfigSpec.BooleanValue IP_DIMENSION_ADDER;
         public final ForgeConfigSpec.BooleanValue IP_DIMENSION_REMOVER;
@@ -133,6 +134,7 @@ public class TRConfig {
             builder.pop();
             DIMENSION_DELETE_MODE = builder.translation(ModMessages.CONFIG_DIMENSION_DELETE_MODE).comment("The method used to delete dimensions. IMMEDIATE deletes the dimension immediately while NEXT_SHUTDOWN schedules the dimension for deletion on server shutdown. NEXT_SHUTDOWN is primarily intended for use with Valkyrien Skies 2.4.11 and lower as it may crash otherwise due to a bug. IMMEDIATE should work fine with most unless they do something weird. Note that NEXT_SHUTDOWN does NOT allow you to recover a TARDIS deleted accidentally.").defineEnum("dimension_delete_mode", DeleteMode.getDefault());
             DELETE_ESCAPE_SEQUENCE = builder.translation(ModMessages.CONFIG_DELETE_ESCAPE_SEQUENCE).comment("If true, blocks will start breaking inside the TARDIS when deleting it with a terraformer. Set to false to disable this feature.").define("delete_escape_sequence", true);
+            DELETION_TIMER = builder.translation(ModMessages.CONFIG_DELETION_TIMER).comment("The time between activating the terraformer to delete a TARDIS and the TARDIS automatically deleting itself even if players are inside (all players will be safely ejected). Set to -1 to disable the timer.").defineInRange("deletion_timer", 12000, -1, Integer.MAX_VALUE);
             builder.pop();
             builder.push("compatibility");
             builder.push("immersive_portals");

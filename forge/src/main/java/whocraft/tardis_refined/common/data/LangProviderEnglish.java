@@ -350,6 +350,7 @@ public class LangProviderEnglish extends LanguageProvider {
         add(ModMessages.CONFIG_CUSTOM_SHADERS, "Use Custom Shaders");
         add(ModMessages.CONFIG_DIMENSION_DELETE_MODE, "Dimension Delete Mode");
         add(ModMessages.CONFIG_DELETE_ESCAPE_SEQUENCE, "Delete Escape Sequence");
+        add(ModMessages.CONFIG_DELETION_TIMER, "Deletion Timer");
         add(ModMessages.SCREEN_SHAKE_MULTIPLIER, "Screen Shake Multiplier");
 
         /*Overlay Messages*/

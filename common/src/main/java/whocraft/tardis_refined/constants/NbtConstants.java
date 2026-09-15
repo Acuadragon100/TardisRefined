@@ -31,6 +31,7 @@ public class NbtConstants {
     public static final String TARDIS_IM_GENERATED_CORRIDORS = "im_generated_corridors";
     public static final String TARDIS_IM_AIRLOCK_CENTER = "im_generated_airlock_center";
     public static final String TARDIS_IM_DELETING = "im_deleting";
+    public static final String TARDIS_IM_DELETING_WAITING_TIME = "im_deleting_waiting_time";
     public static final String TARDIS_CURRENT_HUM = "tardis_current_hum";
     public static final String TARDIS_IM_FUEL_FOR_INT_CHANGE = "tardis_fuel_for_int_change";
 

@@ -146,6 +146,9 @@ public class TardisInteriorManager extends TickableHandler {
         }
 
         tag.putBoolean(NbtConstants.TARDIS_IM_DELETING, deleting);
+        if (deleting) {
+            tag.putInt(NbtConstants.TARDIS_IM_DELETING_WAITING_TIME, deletionWaitingTime);
+        }
 
 
         tag.putString(NbtConstants.TARDIS_IM_PREPARED_THEME, this.preparedTheme != null ? this.preparedTheme.getIdentifier().toString() : "");
@@ -171,6 +174,9 @@ public class TardisInteriorManager extends TickableHandler {
         this.humEntry = TardisHums.getHumById(new ResourceLocation(tag.getString(NbtConstants.TARDIS_CURRENT_HUM)));
         if (tag.contains(NbtConstants.TARDIS_IM_DELETING, Tag.TAG_BYTE)) {
             this.deleting = tag.getBoolean(NbtConstants.TARDIS_IM_DELETING);
+            if (tag.contains(NbtConstants.TARDIS_IM_DELETING_WAITING_TIME, Tag.TAG_INT)) {
+                this.deletionWaitingTime = tag.getInt(NbtConstants.TARDIS_IM_DELETING_WAITING_TIME);
+            }
         }
 
         this.fuelForIntChange = tag.getDouble(NbtConstants.TARDIS_IM_FUEL_FOR_INT_CHANGE);
@@ -433,8 +439,8 @@ public class TardisInteriorManager extends TickableHandler {
         return true;
     }
 
-    private int emptyTime = 0;
-    private int waitingTime = 0;
+    private int deletionEmptyTime = 0;
+    private int deletionWaitingTime = 0;
 
     private void doBreakingEffects(ServerLevel level) {
         if (!TRConfig.SERVER.DELETE_ESCAPE_SEQUENCE.get()) return;
@@ -443,7 +449,7 @@ public class TardisInteriorManager extends TickableHandler {
         int maxCount = 350;
         int perTickBreakChance = 20;
 
-        int nearPlayerChance = Math.max(5, 50 - waitingTime / 10);
+        int nearPlayerChance = Math.max(5, 50 - deletionWaitingTime / 10);
 
         double maxDistanceFactor = 1.5;
 
@@ -503,12 +509,12 @@ public class TardisInteriorManager extends TickableHandler {
             }
         }
         if (level.players().isEmpty()) {
-            emptyTime++;
-            if (emptyTime > 50) {
+            deletionEmptyTime++;
+            if (deletionEmptyTime > 50) {
                 operator.setDoorClosed(true);
             }
         } else {
-            waitingTime++;
+            deletionWaitingTime++;
         }
     }
 
@@ -536,6 +542,11 @@ public class TardisInteriorManager extends TickableHandler {
         }));
     }
 
+    private boolean isTimeUp() {
+        int time = TRConfig.SERVER.DELETION_TIMER.get();
+	    return time >= 0 && deletionWaitingTime >= time;
+    }
+
     /**
      * Master logic that schedules the desktop preparation, generation and aesthetic effects in one place
      * <br> Should be called in the {@link TardisInteriorManager#tick()}
@@ -543,7 +554,7 @@ public class TardisInteriorManager extends TickableHandler {
     public void handleDesktopGeneration(ServerLevel level) {
         if (deleting) {
             playGenerationEffects(level);
-            if (level.players().isEmpty() && !operator.getExteriorManager().isDoorOpen()) {
+            if ((level.players().isEmpty() && !operator.getExteriorManager().isDoorOpen()) || isTimeUp()) {
                 performDelete(level);
             } else {
                 doBreakingEffects(level);
@@ -630,8 +641,8 @@ public class TardisInteriorManager extends TickableHandler {
 
     public void cancelDeletion() {
         deleting = false;
-        emptyTime = 0;
-        waitingTime = 0;
+        deletionEmptyTime = 0;
+        deletionWaitingTime = 0;
     }
 
     /**
