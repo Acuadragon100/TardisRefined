@@ -497,18 +497,6 @@ public class TardisInteriorManager extends TickableHandler {
                 }
             }
         }
-        if (level.players().isEmpty()) {
-            deletionEmptyTime++;
-            if (deletionEmptyTime > 50) {
-                operator.setDoorClosed(true);
-            }
-        } else {
-            deletionWaitingTime++;
-            int max = TRConfig.SERVER.DELETION_TIMER.get();
-            if (max > 0) {
-                operator.tardisClientData().setDeletionTimerValue(OptionalInt.of(max - deletionWaitingTime));
-            }
-        }
     }
 
     private void performDelete(ServerLevel level) {
@@ -551,6 +539,18 @@ public class TardisInteriorManager extends TickableHandler {
                 performDelete(level);
             } else {
                 doBreakingEffects(level);
+                if (level.players().isEmpty()) {
+                    deletionEmptyTime++;
+                    if (deletionEmptyTime > 50) {
+                        operator.setDoorClosed(true);
+                    }
+                } else {
+                    deletionWaitingTime++;
+                    int max = TRConfig.SERVER.DELETION_TIMER.get();
+                    if (max > 0) {
+                        operator.tardisClientData().setDeletionTimerValue(OptionalInt.of(max - deletionWaitingTime));
+                    }
+                }
             }
             return;
         }
