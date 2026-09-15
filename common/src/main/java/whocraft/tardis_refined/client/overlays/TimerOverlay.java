@@ -16,7 +16,7 @@ public class TimerOverlay {
 
     private static final DecimalFormat DECIMAL_FORMATTER = new DecimalFormat("#.00");
 
-    private static final DecimalFormat WHOLE_FORMATTER = new DecimalFormat("00.");
+    private static final DecimalFormat WHOLE_FORMATTER = new DecimalFormat("00.#");
 
     static {
         DECIMAL_FORMATTER.setRoundingMode(RoundingMode.FLOOR);
