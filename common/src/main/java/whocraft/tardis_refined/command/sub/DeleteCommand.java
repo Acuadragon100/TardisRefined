@@ -33,7 +33,7 @@ public class DeleteCommand implements Command<CommandSourceStack> {
 
         if (tardisData.isPresent() && tardis.dimensionTypeId() == TRDimensionTypes.TARDIS) {
 
-            tardisData.get().deleteTARDIS();
+            tardisData.get().deleteTARDISNow();
             PlayerUtil.sendMessage(sender, Component.translatable(ModMessages.DELETED_TARDIS), false);
 
             return Command.SINGLE_SUCCESS;

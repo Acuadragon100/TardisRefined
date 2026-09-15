@@ -652,4 +652,8 @@ public class TardisLevelOperator {
     public void deleteTARDIS() {
         getInteriorManager().deleteTARDIS();
     }
+
+    public void deleteTARDISNow() {
+        getInteriorManager().deleteTARDISNow();
+    }
 }

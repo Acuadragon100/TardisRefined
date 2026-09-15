@@ -622,6 +622,12 @@ public class TardisInteriorManager extends TickableHandler {
         deleting = true;
     }
 
+    public void deleteTARDISNow() {
+        if (operator.getLevel() instanceof ServerLevel sl) {
+            performDelete(sl);
+        }
+    }
+
     public void cancelDeletion() {
         deleting = false;
         emptyTime = 0;
