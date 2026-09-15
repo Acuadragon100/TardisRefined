@@ -130,6 +130,20 @@ public class TardisExteriorManager extends BaseHandler {
         }
     }
 
+    public boolean isDoorOpen() {
+        TardisNavLocation currentPosition = this.operator.getPilotingManager().getCurrentLocation();
+
+        if (currentPosition == null) return false;
+        ServerLevel lastKnownLocationLevel = currentPosition.getLevel();
+
+        // Get the exterior block.
+        BlockEntity blockEntity = lastKnownLocationLevel.getBlockEntity(currentPosition.getPosition());
+        if (blockEntity instanceof ExteriorShell exteriorShell) {
+            return exteriorShell.isOpen();
+        }
+        return false;
+    }
+
     public void removeExteriorBlock() {
         this.isLanding = false;
 

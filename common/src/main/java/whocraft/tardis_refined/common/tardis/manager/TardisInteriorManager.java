@@ -543,7 +543,7 @@ public class TardisInteriorManager extends TickableHandler {
     public void handleDesktopGeneration(ServerLevel level) {
         if (deleting) {
             playGenerationEffects(level);
-            if (level.players().isEmpty() && !operator.getInternalDoor().isOpen()) {
+            if (level.players().isEmpty() && !operator.getExteriorManager().isDoorOpen()) {
                 performDelete(level);
             } else {
                 doBreakingEffects(level);
