@@ -349,6 +349,7 @@ public class LangProviderEnglish extends LanguageProvider {
         add(ModMessages.CONFIG_RENDER_VORTEX_IN_DOOR, "Render Vortex within interior door");
         add(ModMessages.CONFIG_CUSTOM_SHADERS, "Use Custom Shaders");
         add(ModMessages.CONFIG_DIMENSION_DELETE_MODE, "Dimension Delete Mode");
+        add(ModMessages.CONFIG_DELETE_ESCAPE_SEQUENCE, "Delete Escape Sequence");
         add(ModMessages.SCREEN_SHAKE_MULTIPLIER, "Screen Shake Multiplier");
 
         /*Overlay Messages*/

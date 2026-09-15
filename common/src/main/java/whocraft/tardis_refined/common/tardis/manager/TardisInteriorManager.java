@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import whocraft.tardis_refined.TRConfig;
 import whocraft.tardis_refined.api.event.TardisCommonEvents;
 import whocraft.tardis_refined.common.block.device.AntiGravityBlock;
 import whocraft.tardis_refined.common.block.device.CorridorTeleporterBlock;
@@ -436,6 +437,7 @@ public class TardisInteriorManager extends TickableHandler {
     private int waitingTime = 0;
 
     private void doBreakingEffects(ServerLevel level) {
+        if (!TRConfig.SERVER.DELETE_ESCAPE_SEQUENCE.get()) return;
         int maxHorizontalRange = 40;
         int maxVerticalRange = 20;
         int maxCount = 350;
