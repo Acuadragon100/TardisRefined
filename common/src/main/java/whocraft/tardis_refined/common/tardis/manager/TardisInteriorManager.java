@@ -49,9 +49,7 @@ import whocraft.tardis_refined.constants.NbtConstants;
 import whocraft.tardis_refined.constants.TardisDimensionConstants;
 import whocraft.tardis_refined.registry.TRBlockRegistry;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class TardisInteriorManager extends TickableHandler {
     public static final BlockPos STATIC_CORRIDOR_POSITION = new BlockPos(1013, 99, 5);
@@ -435,21 +433,53 @@ public class TardisInteriorManager extends TickableHandler {
     }
 
     private int emptyTime = 0;
+    private int waitingTime = 0;
 
     private void doBreakingEffects(ServerLevel level) {
+        int maxHorizontalRange = 40;
+        int maxVerticalRange = 20;
+        int maxCount = 350;
+        int perTickBreakChance = 20;
+
+        int nearPlayerChance = Math.max(5, 50 - waitingTime / 10);
+
+        double maxDistanceFactor = 1.5;
+
         for (var player : level.players()) {
-            if (player.tickCount % (player.getRandom().nextInt(20) + 1) == 0) {
-                int count = player.getRandom().nextInt(250);
-                int range = player.getRandom().nextInt(25);
+            if (player.isSpectator()) continue;
+            if (player.tickCount % (player.getRandom().nextInt(perTickBreakChance) + 1) == 0) {
+                boolean nearPlayer = level.getRandom().nextInt(nearPlayerChance) == 0;
+                int currentHorizontalRange = maxHorizontalRange;
+                if (nearPlayer) {
+                    currentHorizontalRange /= 2;
+                }
+                double maxHorizontalDistance = currentHorizontalRange * currentHorizontalRange * maxDistanceFactor * maxDistanceFactor;
+                var otherPlayers = level.getPlayers(p -> {
+                    if (p.isSpectator() || p == player) {
+                        return false;
+                    }
+
+                    var distance = p.position().subtract(player.position());
+                    double horizontalDistance = distance.horizontalDistanceSqr();
+                    if (horizontalDistance < maxHorizontalDistance) {
+	                    double reductionAmount = (maxHorizontalDistance - horizontalDistance) / maxHorizontalDistance;
+                        return distance.y() < maxVerticalRange * maxDistanceFactor * reductionAmount;
+                    }
+                    return false;
+                });
+                int count = player.getRandom().nextInt(maxCount / (otherPlayers.size() + 1));
                 var playerPos = player.blockPosition();
                 for (
                         BlockPos pos : BlockPos.randomBetweenClosed(
                               player.getRandom(), count,
-                              playerPos.getX() - range, playerPos.getY()-1, playerPos.getZ() - range,
-                              playerPos.getX() + range, playerPos.getY() + range, playerPos.getZ() + range
+                              playerPos.getX() - currentHorizontalRange, playerPos.getY() - (nearPlayer ? 1 : maxVerticalRange), playerPos.getZ() - currentHorizontalRange,
+                              playerPos.getX() + currentHorizontalRange, playerPos.getY() + maxVerticalRange, playerPos.getZ() + currentHorizontalRange
                         )
                 ) {
                     if (!canBreak(level, pos, level.getBlockState(pos)) || level.getBlockState(pos).isAir()) {
+                        continue;
+                    }
+                    if (pos.getY() == player.blockPosition().getY() && pos.distToCenterSqr(player.position()) < 10 && player.getRandom().nextInt(10) != 0 && !nearPlayer) {
                         continue;
                     }
                     var centerPos = Vec3.atCenterOf(pos);
@@ -475,6 +505,8 @@ public class TardisInteriorManager extends TickableHandler {
             if (emptyTime > 50) {
                 operator.setDoorClosed(true);
             }
+        } else {
+            waitingTime++;
         }
     }
 
@@ -589,6 +621,7 @@ public class TardisInteriorManager extends TickableHandler {
     public void cancelDeletion() {
         deleting = false;
         emptyTime = 0;
+        waitingTime = 0;
     }
 
     /**
