@@ -515,23 +515,25 @@ public class TardisInteriorManager extends TickableHandler {
     private void performDelete(ServerLevel level) {
         operator.setDoorClosed(true);
         operator.setDoorLocked(true);
-        operator.forceEjectAllPlayers();
-        operator.getExteriorManager().removeExteriorBlock();
+        level.getServer().tell(level.getServer().wrapRunnable(() -> {
+            operator.forceEjectAllPlayers();
+            operator.getExteriorManager().removeExteriorBlock();
 
-        if (operator.getPilotingManager().getCurrentConsole() != null) {
-            level.setBlockAndUpdate(
-                    operator.getPilotingManager().getCurrentConsole().getBlockPos(),
-                    Blocks.AIR.defaultBlockState()
-            );
-        }
+            if (operator.getPilotingManager().getCurrentConsole() != null) {
+                level.setBlockAndUpdate(
+                        operator.getPilotingManager().getCurrentConsole().getBlockPos(),
+                        Blocks.AIR.defaultBlockState()
+                );
+            }
 
-        var levelKey = operator.getLevelKey();
-        operator.getPilotingManager().setFuel(0);
-        operator.getPilotingManager().setCurrentLocation(new TardisNavLocation(BlockPos.ZERO, Direction.NORTH, levelKey));
-        operator.getInteriorManager().cancelDesktopChange();
+            var levelKey = operator.getLevelKey();
+            operator.getPilotingManager().setFuel(0);
+            operator.getPilotingManager().setCurrentLocation(new TardisNavLocation(BlockPos.ZERO, Direction.NORTH, levelKey));
+            operator.getInteriorManager().cancelDesktopChange();
 
-        operator.setTardisState(TardisLevelOperator.STATE_DELETED);
-        DimensionHandler.deleteDimension(levelKey);
+            operator.setTardisState(TardisLevelOperator.STATE_DELETED);
+            DimensionHandler.deleteDimension(levelKey);
+        }));
     }
 
     /**
