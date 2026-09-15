@@ -11,6 +11,7 @@
 - Added config option to choose how much the travel time can vary in percentage.
 - Added config option to change the default TARDIS travel speed.
 - Added config option to change the default TARDIS XP gain.
+- The terraformer can now delete the TARDIS. Place the terraformer on top of a 3x3 platform of TNT and activate it with your amethyst screwdriver (note that you need to break all the artron pillars first).
 
 #### Commands
 
@@ -23,6 +24,7 @@
 - Pressing E will now close Monitor, ARS, and Astral Manipulator GUIs.
 - Improved keyboard navigation support for the Monitor and Astral Manipulator GUIs.
 - The TARDIS item will now read the `setup_data` tag on the item, if it exists, and pass it on to the created TARDIS.
+- The terraformer will now accept oxidized and waxed copper block variants for terraforming the root shell.
 
 #### Configs
 
@@ -30,6 +32,7 @@
 - Config to not use the Immersive Portals dimension remover.
 - Config to not use smooth Immersive Portals teleportation.
 - Config to choose which deletion mode to use. Either immediately or scheduled for the next shutdown.
+- Config to toggle whether blocks should break and fall from the ceiling while deleting the TARDIS.
 
 #### Bug Fixes
 
