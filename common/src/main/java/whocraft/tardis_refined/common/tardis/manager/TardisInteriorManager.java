@@ -50,6 +50,7 @@ import whocraft.tardis_refined.constants.TardisDimensionConstants;
 import whocraft.tardis_refined.registry.TRBlockRegistry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TardisInteriorManager extends TickableHandler {
@@ -416,8 +417,14 @@ public class TardisInteriorManager extends TickableHandler {
             return false;
         }
 
-        // Don't break the airlock too much.
-        if (pos.distManhattan(STATIC_CORRIDOR_POSITION) < 5 || pos.distManhattan(corridorAirlockCenter) < 5) {
+        // Avoid breaking places like the airlock.
+        if (
+                Arrays.stream(unbreakableZones()).anyMatch(
+                        zone -> !zone.isAllowBreaking() && zone.getArea().intersects(
+                                AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(pos))
+                        )
+                )
+        ) {
             return false;
         }
         // In case deletion is aborted we still want it to be usable.
