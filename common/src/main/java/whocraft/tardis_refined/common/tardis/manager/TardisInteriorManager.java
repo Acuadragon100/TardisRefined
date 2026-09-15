@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import whocraft.tardis_refined.TRConfig;
 import whocraft.tardis_refined.api.event.TardisCommonEvents;
 import whocraft.tardis_refined.common.block.device.AntiGravityBlock;
@@ -30,14 +31,13 @@ import whocraft.tardis_refined.common.block.device.TerraformerBlock;
 import whocraft.tardis_refined.common.block.door.BulkHeadDoorBlock;
 import whocraft.tardis_refined.common.block.door.InternalDoorBlock;
 import whocraft.tardis_refined.common.block.life.ArsEggBlock;
-import whocraft.tardis_refined.common.block.life.EyeBlock;
-import whocraft.tardis_refined.common.block.shell.ShellBaseBlock;
 import whocraft.tardis_refined.common.blockentity.door.BulkHeadDoorBlockEntity;
 import whocraft.tardis_refined.common.blockentity.door.TardisInternalDoor;
 import whocraft.tardis_refined.common.capability.tardis.TardisLevelOperator;
 import whocraft.tardis_refined.common.capability.tardis.upgrades.UpgradeHandler;
 import whocraft.tardis_refined.common.dimension.DimensionHandler;
 import whocraft.tardis_refined.common.tardis.TardisNavLocation;
+import whocraft.tardis_refined.common.util.MiscHelper;
 import whocraft.tardis_refined.registry.TRUpgrades;
 import whocraft.tardis_refined.common.dimension.TardisTeleportData;
 import whocraft.tardis_refined.common.soundscape.hum.HumEntry;
@@ -412,28 +412,17 @@ public class TardisInteriorManager extends TickableHandler {
             return false;
         }
 
-        if (state.getBlock() instanceof ShellBaseBlock) {
-            // Not sure how that got in here, but let's not break it.
-            return false;
-        }
-
-        // Would be kind of awkward if deletion has a chance to cancel deltion.
+        // Would be kind of awkward if deletion has a chance to cancel deletion.
         if (state.getBlock() instanceof TerraformerBlock) {
             return false;
         }
 
-        // Avoid breaking places like the airlock.
-        if (
-                Arrays.stream(unbreakableZones()).anyMatch(
-                        zone -> !zone.isAllowBreaking() && zone.getArea().intersects(
-                                AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(pos))
-                        )
-                )
-        ) {
+        // Avoid breaking unbreakable blocks.
+        if (MiscHelper.shouldCancelBreaking(level, CollisionContext.empty(), pos, state)) {
             return false;
         }
         // In case deletion is aborted we still want it to be usable.
-        if (state.getBlock() instanceof ArsEggBlock || state.getBlock() instanceof CorridorTeleporterBlock || state.getBlock() instanceof AntiGravityBlock || state.getBlock() instanceof EyeBlock) {
+        if (state.getBlock() instanceof ArsEggBlock || state.getBlock() instanceof CorridorTeleporterBlock || state.getBlock() instanceof AntiGravityBlock) {
             return false;
         }
         return true;

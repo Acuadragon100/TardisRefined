@@ -25,6 +25,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import org.apache.commons.lang3.text.WordUtils;
 import whocraft.tardis_refined.TardisRefined;
 import whocraft.tardis_refined.common.block.console.GlobalConsoleBlock;
@@ -181,6 +182,10 @@ public class MiscHelper {
     }
 
     public static boolean shouldCancelBreaking(Level world, Entity entity, BlockPos pos, BlockState state) {
+        return shouldCancelBreaking(world, entity != null ? CollisionContext.of(entity) : CollisionContext.empty(), pos, state);
+    }
+
+    public static boolean shouldCancelBreaking(Level world, CollisionContext collisionContext, BlockPos pos, BlockState state) {
 
         if (world.dimensionTypeId() == TRDimensionTypes.TARDIS && world instanceof ServerLevel serverLevel) {
             if (TardisLevelOperator.get(serverLevel).isPresent()) {

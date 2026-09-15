@@ -23,7 +23,7 @@ public class MultiplayerGameModeMixin {
         ClientLevel level = this.minecraft.level;
         if (level == null) return;
 
-        if (MiscHelper.shouldCancelBreaking(level, null, blockPos, level.getBlockState(blockPos))) {
+        if (MiscHelper.shouldCancelBreaking(level, minecraft.player, blockPos, level.getBlockState(blockPos))) {
             cir.setReturnValue(false);
             cir.cancel();
         }
