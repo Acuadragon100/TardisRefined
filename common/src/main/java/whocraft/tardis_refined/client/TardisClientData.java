@@ -1,6 +1,7 @@
 package whocraft.tardis_refined.client;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.AnimationState;
@@ -16,11 +17,7 @@ import whocraft.tardis_refined.common.tardis.themes.ShellTheme;
 import whocraft.tardis_refined.constants.NbtConstants;
 import whocraft.tardis_refined.patterns.ShellPatterns;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class TardisClientData {
     private static final TardisClientData DUMMY = new TardisClientData(Level.OVERWORLD);
@@ -58,6 +55,9 @@ public class TardisClientData {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private Optional<HumEntry> humEntry = Optional.empty();
     private SettingsHandler settingsHandler = new SettingsHandler(Optional.empty());
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private OptionalInt deletionTimerValue = OptionalInt.empty();
+    private long lastSyncTime = System.currentTimeMillis();
     public TardisClientData(ResourceKey<Level> resourceKey) {
         this.levelKey = resourceKey;
     }
@@ -129,6 +129,14 @@ public class TardisClientData {
 
     public void setHumEntry(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<HumEntry> humEntry) {
         this.humEntry = humEntry;
+    }
+
+    public void setDeletionTimerValue(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") OptionalInt deletionTimerValue) {
+        this.deletionTimerValue = deletionTimerValue;
+    }
+
+    public OptionalInt getDeletionTimerValue() {
+        return deletionTimerValue;
     }
 
     public int getThrottleStage() {
@@ -211,6 +219,10 @@ public class TardisClientData {
         this.settingsHandler = settingsHandler;
     }
 
+    public long getLastSyncTime() {
+        return lastSyncTime;
+    }
+
     /**
      * Serializes the Tardis instance to a CompoundTag.
      *
@@ -235,6 +247,7 @@ public class TardisClientData {
         compoundTag.putString("shellPattern", shellPattern.toString());
 
         humEntry.ifPresent(hum -> compoundTag.putString(NbtConstants.TARDIS_CURRENT_HUM, hum.getIdentifier().toString()));
+        deletionTimerValue.ifPresent(timerValue -> compoundTag.putInt(NbtConstants.TARDIS_IM_DELETING_WAITING_TIME, timerValue));
 
         compoundTag.putDouble(NbtConstants.FUEL, fuel);
         compoundTag.putDouble(NbtConstants.MAXIMUM_FUEL, maximumFuel);
@@ -271,9 +284,16 @@ public class TardisClientData {
             setHumEntry(Optional.empty());
         }
 
+        if (compoundTag.contains(NbtConstants.TARDIS_IM_DELETING_WAITING_TIME, Tag.TAG_INT)) {
+            deletionTimerValue = OptionalInt.of(compoundTag.getInt(NbtConstants.TARDIS_IM_DELETING_WAITING_TIME));
+        } else {
+            deletionTimerValue = OptionalInt.empty();
+        }
+
         fuel = compoundTag.getDouble(NbtConstants.FUEL);
         maximumFuel = compoundTag.getDouble(NbtConstants.MAXIMUM_FUEL);
         settingsHandler.loadData(compoundTag);
+        lastSyncTime = System.currentTimeMillis();
     }
 
     /**

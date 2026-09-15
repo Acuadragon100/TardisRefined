@@ -515,6 +515,10 @@ public class TardisInteriorManager extends TickableHandler {
             }
         } else {
             deletionWaitingTime++;
+            int max = TRConfig.SERVER.DELETION_TIMER.get();
+            if (max > 0) {
+                operator.tardisClientData().setDeletionTimerValue(OptionalInt.of(max - deletionWaitingTime));
+            }
         }
     }
 
@@ -643,6 +647,7 @@ public class TardisInteriorManager extends TickableHandler {
         deleting = false;
         deletionEmptyTime = 0;
         deletionWaitingTime = 0;
+        operator.tardisClientData().setDeletionTimerValue(OptionalInt.empty());
     }
 
     /**

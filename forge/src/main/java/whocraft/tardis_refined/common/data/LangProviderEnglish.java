@@ -357,6 +357,7 @@ public class LangProviderEnglish extends LanguageProvider {
         add(ModMessages.ASCEND_KEY, "Ascend: %s");
         add(ModMessages.DESCEND_KEY, "Descend: %s");
         add(ModMessages.EXIT_EXTERNAL_VIEW, "Exit Shell View: ");
+        add(ModMessages.DELETION_TIMER, "Automatic Ejection in %s");
 
         /*Upgrades*/
         addUpgrade(TRUpgrades.CHAMELEON_CIRCUIT_SYSTEM.get(), "Chameleon Circuit", "Allows the TARDIS to change it's shape");

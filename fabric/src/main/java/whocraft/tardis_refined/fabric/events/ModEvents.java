@@ -28,6 +28,7 @@ import net.minecraft.world.level.Level;
 import whocraft.tardis_refined.client.*;
 import whocraft.tardis_refined.client.overlays.ExteriorViewOverlay;
 import whocraft.tardis_refined.client.overlays.GravityOverlay;
+import whocraft.tardis_refined.client.overlays.TimerOverlay;
 import whocraft.tardis_refined.client.overlays.VortexOverlay;
 import whocraft.tardis_refined.client.renderer.vortex.RenderTargetHelper;
 import whocraft.tardis_refined.command.TardisRefinedCommand;
@@ -165,6 +166,7 @@ public class ModEvents {
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> VortexOverlay.renderOverlay(guiGraphics.get()));
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> ExteriorViewOverlay.renderOverlay(guiGraphics.get()));
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> GravityOverlay.renderOverlay(guiGraphics.get()));
+        HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> TimerOverlay.renderOverlay(guiGraphics.get()));
     }
 
 

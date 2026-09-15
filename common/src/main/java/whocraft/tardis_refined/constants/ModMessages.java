@@ -111,6 +111,7 @@ public class ModMessages {
     public static String HARDWARE_OFFLINE = message("hardware_offline");
     public static String ASCEND_KEY = message("ascend_key");
     public static String DESCEND_KEY = message("descend_key");
+    public static String DELETION_TIMER = message("deletion_timer");
     public static String EXIT_EXTERNAL_VIEW = message("exit_external_view");
     public static String NO_FLIGHT_TRANSITIVE = message("no_flight_transitive");
     public static String HANDBRAKE_ENGAGED = message("handbrake_engaged");

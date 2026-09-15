@@ -5,6 +5,7 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import whocraft.tardis_refined.client.overlays.ExteriorViewOverlay;
 import whocraft.tardis_refined.client.overlays.GravityOverlay;
+import whocraft.tardis_refined.client.overlays.TimerOverlay;
 import whocraft.tardis_refined.client.overlays.VortexOverlay;
 
 public class TardisRefinedOverlay implements IGuiOverlay {
@@ -14,5 +15,6 @@ public class TardisRefinedOverlay implements IGuiOverlay {
         VortexOverlay.renderOverlay(arg);
         GravityOverlay.renderOverlay(arg);
         ExteriorViewOverlay.renderOverlay(arg);
+        TimerOverlay.renderOverlay(arg);
     }
 }
