@@ -67,7 +67,7 @@ public class ModMessages {
     public static final String CONFIG_DISTANCE_SPEED_FACTOR = config("distance.speed_factor");
     public static final String CONFIG_DISTANCE_XP_FACTOR = config("distance.xp_factor");
     public static final String CONFIG_DIMENSION_DELETE_MODE = config("dimension_delete_mode");
-    public static final String CONFIG_DELETE_ESCAPE_SEQUENCE = config("delete_escape_sequence");
+    public static final String CONFIG_DELETION_COLLAPSE = config("deletion_collapse");
     public static final String CONFIG_DELETION_TIMER = config("deletion_timer");
     public static final String CMD_DIM_NOT_A_TARDIS = cmdOutput("dim_not_a_tardis");
     public static final String CMD_NO_INTERNAL_DOOR = cmdOutput("no_internal_door");

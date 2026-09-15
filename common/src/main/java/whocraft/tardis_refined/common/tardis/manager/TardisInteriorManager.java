@@ -432,7 +432,7 @@ public class TardisInteriorManager extends TickableHandler {
     private int deletionWaitingTime = 0;
 
     private void doBreakingEffects(ServerLevel level) {
-        if (!TRConfig.SERVER.DELETE_ESCAPE_SEQUENCE.get()) return;
+        if (!TRConfig.SERVER.DELETION_COLLAPSE.get()) return;
         int maxHorizontalRange = 40;
         int maxVerticalRange = 20;
         int maxCount = 350;

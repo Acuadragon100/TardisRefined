@@ -8,11 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import whocraft.tardis_refined.common.util.Platform;
 import whocraft.tardis_refined.constants.ModMessages;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class TRConfig {
 
@@ -82,7 +78,7 @@ public class TRConfig {
         public final ForgeConfigSpec.DoubleValue SPEED_FACTOR;
         public final ForgeConfigSpec.DoubleValue XP_FACTOR;
         public final ForgeConfigSpec.EnumValue<DeleteMode> DIMENSION_DELETE_MODE;
-        public final ForgeConfigSpec.BooleanValue DELETE_ESCAPE_SEQUENCE;
+        public final ForgeConfigSpec.BooleanValue DELETION_COLLAPSE;
         public final ForgeConfigSpec.IntValue DELETION_TIMER;
 
         public final ForgeConfigSpec.BooleanValue IP_DIMENSION_ADDER;
@@ -133,7 +129,7 @@ public class TRConfig {
             XP_FACTOR = builder.translation(ModMessages.CONFIG_DISTANCE_XP_FACTOR).comment("Factor that the speed is multiplied by every second to calculate the XP gained.").defineInRange("xp_factor", 0.05, 0, Double.MAX_VALUE);
             builder.pop();
             DIMENSION_DELETE_MODE = builder.translation(ModMessages.CONFIG_DIMENSION_DELETE_MODE).comment("The method used to delete dimensions. IMMEDIATE deletes the dimension immediately while NEXT_SHUTDOWN schedules the dimension for deletion on server shutdown. NEXT_SHUTDOWN is primarily intended for use with Valkyrien Skies 2.4.11 and lower as it may crash otherwise due to a bug. IMMEDIATE should work fine with most unless they do something weird. Note that NEXT_SHUTDOWN does NOT allow you to recover a TARDIS deleted accidentally.").defineEnum("dimension_delete_mode", DeleteMode.getDefault());
-            DELETE_ESCAPE_SEQUENCE = builder.translation(ModMessages.CONFIG_DELETE_ESCAPE_SEQUENCE).comment("If true, blocks will start breaking inside the TARDIS when deleting it with a terraformer. Set to false to disable this feature.").define("delete_escape_sequence", true);
+            DELETION_COLLAPSE = builder.translation(ModMessages.CONFIG_DELETION_COLLAPSE).comment("If true, blocks will start breaking inside the TARDIS when deleting it with a terraformer. Set to false to disable this feature.").define("deletion_collapse", true);
             DELETION_TIMER = builder.translation(ModMessages.CONFIG_DELETION_TIMER).comment("The time between activating the terraformer to delete a TARDIS and the TARDIS automatically deleting itself even if players are inside (all players will be safely ejected). Set to -1 to disable the timer.").defineInRange("deletion_timer", 12000, -1, Integer.MAX_VALUE);
             builder.pop();
             builder.push("compatibility");
