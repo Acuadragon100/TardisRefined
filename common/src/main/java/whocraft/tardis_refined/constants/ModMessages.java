@@ -88,6 +88,11 @@ public class ModMessages {
     public static final String CMD_ARG_UPGRADE_INVALID = cmdArgInvalid("upgrade");
     public static final String CMD_ARG_DESKTOP_INVALID = cmdArgInvalid("desktop");
     public static final String CMD_ARG_SHELL_INVALID = cmdArgInvalid("shell");
+    public static final String CMD_CONFIRM_INVALID = cmdArgInvalid("confirm");
+    public static final String CMD_CONFIRM_INFO = cmdOutput("confirm.info");
+    public static final String CMD_CANCEL_SINGLE = cmdOutput("cancel.single");
+    public static final String CMD_CANCEL_MULTI = cmdOutput("cancel.multi");
+    public static final String CMD_DELETE_WARNING = cmdOutput("delete.warning");
     public static final String KEYBIND_EXIT_VIEW = keybind("exit_exterior_view");
     public static final String KEYBIND_TOGGLE_INFO_EXTERIOR_VIEW = keybind("toggle_info_exterior_view");
     public static final String VILLAGER_CAN_FLY = ui("villager_can_pilot");

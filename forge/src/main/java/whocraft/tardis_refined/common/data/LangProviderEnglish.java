@@ -229,6 +229,12 @@ public class LangProviderEnglish extends LanguageProvider {
         add(ModMessages.CMD_ARG_DESKTOP_INVALID, "Invalid Desktop of ID %s");
         add(ModMessages.CMD_ARG_SHELL_INVALID, "Invalid Shell of ID %s");
 
+        add(ModMessages.CMD_CONFIRM_INVALID, "No confirmation with key %s pending");
+        add(ModMessages.CMD_CONFIRM_INFO, "To confirm, please run %s");
+        add(ModMessages.CMD_CANCEL_MULTI, "Cancelled %s pending commands");
+        add(ModMessages.CMD_CANCEL_SINGLE, "Cancelled 1 pending command");
+        add(ModMessages.CMD_DELETE_WARNING, "Are you sure you want to delete %s?");
+
         /*GUI*/
         add(ModMessages.UI_MONITOR_MAIN_TITLE, "COMPUTER BANK");
         add(ModMessages.UI_MONITOR_WAYPOINTS, "WAYPOINTS");

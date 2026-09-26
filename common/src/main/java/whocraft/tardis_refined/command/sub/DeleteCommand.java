@@ -4,6 +4,8 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
@@ -26,21 +28,32 @@ public class DeleteCommand implements Command<CommandSourceStack> {
                                 .executes(context -> deleteTARDIS(context, DimensionArgument.getDimension(context, "tardis"))));
     }
 
-    private static int deleteTARDIS(CommandContext<CommandSourceStack> context, ServerLevel tardis) {
+    private static int deleteTARDIS(CommandContext<CommandSourceStack> context, ServerLevel tardis) throws CommandSyntaxException {
         Optional<TardisLevelOperator> tardisData = TardisLevelOperator.get(tardis);
 
         ServerPlayer sender = context.getSource().getPlayer();
 
         if (tardisData.isPresent() && tardis.dimensionTypeId() == TRDimensionTypes.TARDIS) {
 
-            tardisData.get().deleteTARDISNow();
-            PlayerUtil.sendMessage(sender, Component.translatable(ModMessages.DELETED_TARDIS), false);
+            return ConfirmCommand.runWithConfirmation(
+                    context.getSource(), () -> {
+                        tardisData.get().deleteTARDISNow();
+                        PlayerUtil.sendMessage(sender, Component.translatable(ModMessages.DELETED_TARDIS), false);
 
-            return Command.SINGLE_SUCCESS;
+                        return Command.SINGLE_SUCCESS;
+                    },
+                    () -> Component.translatable(
+                            ModMessages.CMD_DELETE_WARNING,
+                            Component.literal(tardis.getLevel().dimension().location().toString()).withStyle(
+                                    style -> style.withColor(ChatFormatting.WHITE)
+                            )).withStyle(style -> style.withColor(ChatFormatting.RED)
+                    ),
+                    () -> Command.SINGLE_SUCCESS
+            );
         }
         PlayerUtil.sendMessage(sender, Component.translatable(ModMessages.CMD_DIM_NOT_A_TARDIS, tardis.dimensionTypeId().location().toString()), false);
         return 0;
-    }
+}
 
 
     @Override

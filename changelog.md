@@ -16,6 +16,7 @@
 #### Commands
 
 - Added `/tardis_refined delete <tardis>` which deletes the given TARDIS and its dimension.
+- Added `/tardis_refined confirm` and `/tardis_refined cancel` for use with the new delete command (these commands are only available when there is a command to confirm).
 
 #### Changes
 

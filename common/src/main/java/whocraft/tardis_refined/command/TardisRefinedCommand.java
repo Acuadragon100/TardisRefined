@@ -18,6 +18,8 @@ public class TardisRefinedCommand {
                 .then(DeleteCommand.register(dispatcher))
                 .then(Commands.literal("data").then(Commands.literal("export").then(ExportDesktopCommand.register(dispatcher))))
                 .then(LevelCommand.register(dispatcher))
+                .then(ConfirmCommand.register(dispatcher))
+                .then(ConfirmCommand.registerCancellation(dispatcher))
         );
 
         if (!Platform.isProduction()) {

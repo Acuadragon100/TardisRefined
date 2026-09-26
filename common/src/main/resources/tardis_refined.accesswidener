@@ -62,3 +62,5 @@ mutable field net/minecraft/server/MinecraftServer registries Lnet/minecraft/cor
 accessible field net/minecraft/world/level/storage/PlayerDataStorage fixerUpper Lcom/mojang/datafixers/DataFixer;
 accessible field net/minecraft/world/level/storage/PlayerDataStorage playerDir Ljava/io/File;
 accessible field net/minecraft/server/MinecraftServer playerDataStorage Lnet/minecraft/world/level/storage/PlayerDataStorage;
+accessible field net/minecraft/commands/CommandSourceStack source Lnet/minecraft/commands/CommandSource;
+accessible field net/minecraft/commands/CommandSourceStack silent Z
