@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import whocraft.tardis_refined.common.capability.tardis.TardisLevelOperator;
 import whocraft.tardis_refined.common.util.CommandHelper;
 import whocraft.tardis_refined.common.util.PlayerUtil;
+import whocraft.tardis_refined.common.util.TardisHelper;
 import whocraft.tardis_refined.constants.ModMessages;
 import whocraft.tardis_refined.registry.TRDimensionTypes;
 
@@ -44,10 +45,8 @@ public class DeleteCommand implements Command<CommandSourceStack> {
                     },
                     () -> Component.translatable(
                             ModMessages.CMD_DELETE_WARNING,
-                            Component.literal(tardis.getLevel().dimension().location().toString()).withStyle(
-                                    style -> style.withColor(ChatFormatting.WHITE)
-                            )).withStyle(style -> style.withColor(ChatFormatting.RED)
-                    ),
+                            TardisHelper.createTardisIdComponent(tardis.getLevel().dimension().location())
+                    ).withStyle(style -> style.withColor(ChatFormatting.RED)),
                     () -> Command.SINGLE_SUCCESS
             );
         }
